@@ -26,6 +26,7 @@ function App() {
 	return (
 		<div>
 			<Select
+				label="Pick something"
 				open={open}
 				selected={selected}
 				handleOpen={() => setOpen(true)}

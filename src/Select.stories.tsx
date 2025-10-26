@@ -23,6 +23,7 @@ export const Default: Story = {
 		handleOpen: () => {},
 		handleClose: () => {},
 		handleSelect: () => {},
+		onSelectedChange: console.log,
 		options: [
 			{ value: "apple", children: "🍎 Apple" },
 			{ value: "banana", children: "🍌 Banana" },

@@ -20,17 +20,14 @@ interface SelectProps {
 	label: string;
 	selected?: Option;
 	options: Option[];
+	placeholder?: string;
+	triggerIcon?: React.ReactNode;
+	selectedIcon?: React.ReactNode;
 	handleOpen: () => void;
 	handleClose: () => void;
 	handleSelect: (option: Option) => void;
+	onSelectedChange?: (option: Option) => void;
 }
-
-useId;
-
-// [optional] default message
-// [optional] open/close state icon
-// [optional] selected state icon
-// [optional] hook that is triggered after selection
 
 export function Select(props: SelectProps) {
 	const dropdownId = useId();
@@ -45,9 +42,13 @@ export function Select(props: SelectProps) {
 		label,
 		selected,
 		options,
+		placeholder,
+		triggerIcon,
+		selectedIcon,
 		handleOpen,
 		handleClose,
 		handleSelect,
+		onSelectedChange,
 	} = props;
 
 	const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -95,6 +96,14 @@ export function Select(props: SelectProps) {
 		handleClose();
 	};
 
+	useEffect(() => {
+		if (selected && onSelectedChange) {
+			onSelectedChange(selected);
+		}
+	}, [selected, onSelectedChange])
+
+	const placeholderFallback = placeholder ?? "-- Select option --"
+
 	return (
 		<div className={styles.container}>
 			<p className={styles.label} id={labelId}>
@@ -117,10 +126,12 @@ export function Select(props: SelectProps) {
 					className={styles.trigger}
 					onClick={handleOpen}
 				>
-					{selected ? selected.children : "-- Select option --"}
-					<i className={styles.icon} aria-hidden="true">
-						<CaretDown />
-					</i>
+					{selected ? selected.children : placeholderFallback}
+					{triggerIcon ?? (
+						<i className={styles.icon} aria-hidden="true">
+							<CaretDown />
+						</i>
+					)}
 				</button>
 
 				{open && (
@@ -139,6 +150,7 @@ export function Select(props: SelectProps) {
 								key={option.value}
 								ref={activeIndex === i ? optionRef : undefined}
 								selected={selected === option}
+								selectedIcon={selectedIcon}
 								tabIndex={activeIndex === i ? 0 : -1}
 								handleSelect={() => handleSelect(option)}
 							>
@@ -157,6 +169,7 @@ interface SelectOptionProps {
 	selected: boolean;
 	tabIndex: number;
 	children: React.ReactNode;
+	selectedIcon?: React.ReactNode;
 	handleSelect: () => void;
 }
 
@@ -179,9 +192,11 @@ function SelectOption(props: SelectOptionProps) {
 		>
 			{props.children}
 			{props.selected && (
-				<i className={styles.icon} aria-hidden="true">
-					<Tick />
-				</i>
+				props.selectedIcon ?? (
+					<i className={styles.icon} aria-hidden="true">
+						<Tick />
+					</i>
+				)
 			)}
 		</div>
 	);
