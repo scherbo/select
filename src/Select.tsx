@@ -18,6 +18,7 @@ enum Key {
 interface SelectProps {
 	open: boolean;
 	label: string;
+	name: string;
 	selected?: Option;
 	options: Option[];
 	placeholder?: string;
@@ -40,6 +41,7 @@ export function Select(props: SelectProps) {
 	const {
 		open,
 		label,
+		name,
 		selected,
 		options,
 		placeholder,
@@ -133,6 +135,7 @@ export function Select(props: SelectProps) {
 						</i>
 					)}
 				</button>
+				<input type="text" name={name} value={selected?.value ?? ''} readOnly hidden />
 
 				{open && (
 					// setting tabindex=-1 on listbox will:

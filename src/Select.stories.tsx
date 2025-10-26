@@ -19,6 +19,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
 	args: {
 		open: false,
+		name: "fruit",
 		label: "Pick a fruit",
 		handleOpen: () => {},
 		handleClose: () => {},

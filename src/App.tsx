@@ -4,11 +4,6 @@ import { Select } from "./Select";
 
 import type { Option } from "./types";
 
-// this component will demonstrate different use cases;
-
-// without form
-// with form using FormData
-
 function App() {
 	const [open, setOpen] = useState(false);
 	const [selected, setSelected] = useState<Option>();
@@ -23,17 +18,30 @@ function App() {
 		setOpen(false);
 	}
 
+	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+
+		const fd = new FormData(event.currentTarget);
+
+		console.log('fd: ', fd)
+	}
+
 	return (
 		<div>
-			<Select
-				label="Pick something"
-				open={open}
-				selected={selected}
-				handleOpen={() => setOpen(true)}
-				handleClose={() => setOpen(false)}
-				handleSelect={handleSelect}
-				options={options}
-			/>
+			<form onSubmit={handleSubmit}>
+				<Select
+					label="Pick something"
+					name="team"
+					open={open}
+					selected={selected}
+					handleOpen={() => setOpen(true)}
+					handleClose={() => setOpen(false)}
+					handleSelect={handleSelect}
+					options={options}
+				/>
+				<br />
+				<button type="submit">Submit form</button>
+			</form>
 			<br />
 			<br />
 			<br />
@@ -45,7 +53,9 @@ function App() {
 			<br />
 			<br />
 			<br />
-			<button type="button" onClick={() => console.log('button clicked')}>click me</button>
+
+			<p>Select does not have a backdrop, so it does not block the whole viewport when it's opened. Check it by opening the Select and clicking the button below.</p>	
+			<button type="button" onClick={() => alert('button clicked')}>click me</button>
 		</div>
 	);
 }
