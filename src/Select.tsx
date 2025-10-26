@@ -17,6 +17,7 @@ enum Key {
 
 interface SelectProps {
 	open: boolean;
+	label: string;
 	selected?: Option;
 	options: Option[];
 	handleOpen: () => void;
@@ -33,21 +34,35 @@ useId;
 
 export function Select(props: SelectProps) {
 	const dropdownId = useId();
-	const containerRef = useRef<HTMLDivElement>(null);
+	const labelId = useId();
+	const selectRef = useRef<HTMLDivElement>(null);
 	const triggerRef = useRef<HTMLButtonElement>(null);
 	const optionRef = useRef<HTMLDivElement>(null);
 	const [activeIndex, setActiveIndex] = useState(0);
 
-	const { open, selected, options, handleOpen, handleClose, handleSelect } =
-		props;
+	const {
+		open,
+		label,
+		selected,
+		options,
+		handleOpen,
+		handleClose,
+		handleSelect,
+	} = props;
 
 	const handleKeyDown = (event: React.KeyboardEvent) => {
 		if (open) {
-			if (event.code === Key.ArrowDown) setActiveIndex((i) => (i + 1) % options.length);
+			if (event.code === Key.ArrowDown) {
+				setActiveIndex(i => (i + 1) % options.length);
+			}
 
-			if (event.code === Key.ArrowUp) setActiveIndex(i => (i - 1 + options.length) % options.length);
+			if (event.code === Key.ArrowUp) {
+				setActiveIndex(i => (i - 1 + options.length) % options.length);
+			}
 
-			if (event.code === Key.Enter || event.code === Key.Space) handleSelect(options[activeIndex]);
+			if (event.code === Key.Enter || event.code === Key.Space) {
+				handleSelect(options[activeIndex]);
+			}
 
 			if (event.code === Key.Escape) {
 				handleClose();
@@ -65,6 +80,7 @@ export function Select(props: SelectProps) {
 	};
 
 	const handleBlur = (event: React.FocusEvent) => {
+		// focus moves from the listbox to trigger
 		if (
 			event.target === optionRef.current &&
 			event.relatedTarget === triggerRef.current
@@ -72,7 +88,7 @@ export function Select(props: SelectProps) {
 			return handleClose();
 		}
 
-		if (containerRef.current?.contains(event.relatedTarget)) {
+		if (selectRef.current?.contains(event.relatedTarget)) {
 			return;
 		}
 
@@ -80,52 +96,58 @@ export function Select(props: SelectProps) {
 	};
 
 	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: <explanation>
-		<div
-			ref={containerRef}
-			className={styles.container}
-			onBlur={handleBlur}
-			onKeyDown={handleKeyDown}
-		>
-			<button
-				ref={triggerRef}
-				tabIndex={0}
-				type="button"
-				aria-expanded={open}
-				aria-haspopup="listbox"
-				aria-controls={dropdownId}
-				className={styles.trigger}
-				onClick={handleOpen}
+		<div className={styles.container}>
+			<p className={styles.label} id={labelId}>
+				{label}
+			</p>
+			{/* biome-ignore lint/a11y/noStaticElementInteractions: <utilizing event delegation> */}
+			<div
+				ref={selectRef}
+				className={styles.select}
+				onBlur={handleBlur}
+				onKeyDown={handleKeyDown}
 			>
-				{selected ? selected.children : "-- Select option --"}
-				<i className={styles.icon} aria-hidden="true">
-					<CaretDown />
-				</i>
-			</button>
-
-			{open && (
-				// setting tabindex=-1 on listbox will:
-				// - make it technically "tabbable" which would allow listbox to appear as a .relatedTarget on focus event
-				// - practically it won't be "tabbable" because of descendant elements with tabindex=0
-				<div
-					role="listbox"
-					tabIndex={-1}
-					id={dropdownId}
-					className={styles.dropdown}
+				<button
+					ref={triggerRef}
+					tabIndex={0}
+					type="button"
+					aria-expanded={open}
+					aria-labelledby={labelId}
+					aria-controls={open ? dropdownId : undefined}
+					className={styles.trigger}
+					onClick={handleOpen}
 				>
-					{options.map((option, i) => (
-						<SelectOption
-							key={option.value}
-							ref={activeIndex === i ? optionRef : undefined}
-							selected={selected === option}
-							tabIndex={activeIndex === i ? 0 : -1}
-							handleSelect={() => handleSelect(option)}
-						>
-							{option.children}
-						</SelectOption>
-					))}
-				</div>
-			)}
+					{selected ? selected.children : "-- Select option --"}
+					<i className={styles.icon} aria-hidden="true">
+						<CaretDown />
+					</i>
+				</button>
+
+				{open && (
+					// setting tabindex=-1 on listbox will:
+					// - make it technically "tabbable" which would allow listbox to appear as a .relatedTarget on focus event
+					// - practically it won't be "tabbable" because of descendant elements with tabindex=0
+					<div
+						role="listbox"
+						tabIndex={-1}
+						id={dropdownId}
+						className={styles.dropdown}
+						aria-labelledby={labelId}
+					>
+						{options.map((option, i) => (
+							<SelectOption
+								key={option.value}
+								ref={activeIndex === i ? optionRef : undefined}
+								selected={selected === option}
+								tabIndex={activeIndex === i ? 0 : -1}
+								handleSelect={() => handleSelect(option)}
+							>
+								{option.children}
+							</SelectOption>
+						))}
+					</div>
+				)}
+			</div>
 		</div>
 	);
 }
@@ -146,7 +168,7 @@ function SelectOption(props: SelectOptionProps) {
 	}, [props.ref?.current]);
 
 	return (
-		// biome-ignore lint/a11y/useKeyWithClickEvents: <keyboard events are handled in Select>
+		// biome-ignore lint/a11y/useKeyWithClickEvents: <keyboard events are handled in the Select>
 		<div
 			ref={props.ref}
 			role="option"

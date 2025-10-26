@@ -2,6 +2,17 @@
     position: relative;
 }
 
+.label {
+    position: absolute;
+    bottom: calc(100% + 0.25rem);
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.select {
+    position: relative;
+}
+
 .trigger {
     min-width: 200px;
     display: flex;
